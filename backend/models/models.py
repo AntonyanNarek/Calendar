@@ -8,17 +8,20 @@ metadata = MetaData()
 person = Table(
     "person",
     metadata,
-    Column("person_id", Integer, primary_key=True),
+    Column("id", Integer, primary_key=True),
     Column("person_name", String(16), nullable=False),
     Column("tag_id", Integer, nullable=False),
     Column("premium", Boolean, nullable=False),
     Column("email", String(50), nullable=False),
-    Column("status", String(50), nullable=False),
-    Column("about", String(200), nullable=False),
+    Column("status", String(50), nullable=True),
+    Column("about", String(200), nullable=True),
     Column("phone", String(12), nullable=False),
-    Column("theme", String(16), nullable=False),
-    Column("password", String(50), nullable=False),
+    Column("theme", String(16), nullable=True),
+    Column("hashed_password", String(1024), nullable=False),
     Column("registered_at", TIMESTAMP, default=datetime.utcnow),
+    Column("is_active", Boolean, default=True, nullable=False),
+    Column("is_superuser", Boolean, default=False, nullable=False),
+    Column("is_verified", Boolean, default=False, nullable=False),
 )
 
 # Таблица room
@@ -29,7 +32,7 @@ room = Table(
     Column("room_name", String(15), nullable=False),
     Column("link", String(50), nullable=False),
     Column("outdated", Date, nullable=False),
-    Column("person_id", Integer, ForeignKey("person.person_id"), nullable=False),
+    Column("id", Integer, ForeignKey("person.id"), nullable=False),
 )
 
 # Таблица event
@@ -42,7 +45,7 @@ event = Table(
     Column("chat_id", Integer, nullable=False),
     Column("room_id", Integer, ForeignKey("room.room_id"), nullable=False),
     Column("num_members", Integer, nullable=False),
-    Column("person_id", Integer, ForeignKey("person.person_id"), nullable=False),
+    Column("id", Integer, ForeignKey("person.id"), nullable=False),
 )
 
 # Таблица day
@@ -62,7 +65,7 @@ person_day = Table(
     metadata,
     Column("person_day_id", Integer, primary_key=True),
     Column("comment", String(50), nullable=False),
-    Column("person_id", Integer, ForeignKey("person.person_id"), nullable=False),
+    Column("id", Integer, ForeignKey("person.id"), nullable=False),
     Column("day_id", Integer, ForeignKey("day.day_id"), nullable=False),
     Column("is_busy", Boolean, nullable=False),
 )
@@ -72,7 +75,7 @@ person_room = Table(
     "person_room",
     metadata,
     Column("person_room_id", Integer, primary_key=True),
-    Column("person_id", Integer, ForeignKey("person.person_id"), nullable=False),
+    Column("id", Integer, ForeignKey("person.id"), nullable=False),
     Column("room_id", Integer, ForeignKey("room.room_id"), nullable=False),
     Column("color", String(50), nullable=False),
 )
