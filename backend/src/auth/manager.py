@@ -2,17 +2,16 @@ from typing import Optional
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, models, schemas
-from config import SECRET_KEY_RESET_AND_VERIFICATION
-from auth.database import Person, get_user_db
+from config import SECRET_KEY
+from auth.models import Person
+from auth.utils import get_user_db
 
 from auth.generate_id import generate_tag_id
 
-SECRET = SECRET_KEY_RESET_AND_VERIFICATION
-
 
 class UserManager(IntegerIDMixin, BaseUserManager[Person, int]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
+    reset_password_token_secret = SECRET_KEY
+    verification_token_secret = SECRET_KEY
 
     async def on_after_register(self, person: Person, request: Optional[Request] = None):#можно отправить письмо на почту
         print(f"User {person.id} has registered.")

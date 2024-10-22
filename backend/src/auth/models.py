@@ -1,6 +1,8 @@
 from datetime import datetime
 
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import MetaData, Table, Column, Integer, String, TIMESTAMP, ForeignKey, Date, Boolean
+from database import Base
 
 metadata = MetaData()
 
@@ -24,6 +26,26 @@ person = Table(
     Column("is_verified", Boolean, default=False, nullable=False),
 )
 
+
+class Person(SQLAlchemyBaseUserTable[int], Base):
+    __tablename__ = 'person'
+    id = Column(Integer, primary_key=True)
+    person_name = Column(String(length=16), nullable=False)
+    tag_id = Column(Integer, nullable=False)
+    premium = Column(Boolean, nullable=False)
+    status = Column(String(length=50), nullable=True)
+    about = Column(String(length=200), nullable=True)
+    phone = Column(String(length=12), nullable=False)
+    theme = Column(String(length=16), nullable=True)
+    registered_at = Column(TIMESTAMP, default=datetime.utcnow)
+    email = Column(String(length=50), nullable=False)
+    hashed_password: str = Column(String(length=1024), nullable=False)
+    is_active: bool = Column(Boolean, default=True, nullable=False)
+    is_superuser: bool = Column(Boolean, default=False, nullable=False)
+    is_verified: bool = Column(Boolean, default=False, nullable=False)
+    # role_id = Column(Integer, ForeignKey(role.c.id))
+
+""""" Возможно таблицы только те пишутся, с которыми будет взаимодействие в рамках запроса
 # Таблица room
 room = Table(
     "room",
@@ -79,3 +101,5 @@ person_room = Table(
     Column("room_id", Integer, ForeignKey("room.room_id"), nullable=False),
     Column("color", String(50), nullable=False),
 )
+
+"""""

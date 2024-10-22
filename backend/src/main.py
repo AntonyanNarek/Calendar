@@ -1,28 +1,15 @@
-from datetime import datetime
-from enum import Enum
-from typing import List, Optional, Union
+from fastapi_users import FastAPIUsers
 
-from fastapi_users import fastapi_users, FastAPIUsers
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Depends
 
-from fastapi import FastAPI, Request, status, Depends
-from fastapi.encoders import jsonable_encoder
-
-from fastapi.responses import JSONResponse
-
-from auth.database import Person
+from auth.base_config import Person, current_user
 from auth.manager import get_user_manager
-from auth.auth import auth_backend
-
+from auth.base_config import auth_backend, fastapi_users
 from auth.schemas import PersonRead, PersonCreate
+#from operations.router import router as router_operation #потом добавить
 
 app = FastAPI(
     title="Trading App"
-)
-
-fastapi_users = FastAPIUsers[Person, int](
-    get_user_manager,
-    [auth_backend],
 )
 
 app.include_router(
@@ -37,7 +24,7 @@ app.include_router(
     tags=["auth"],
 )
 
-current_user = fastapi_users.current_user()
+
 
 @app.get("/protected-route")
 def protected_route(person: Person = Depends(current_user)):
@@ -47,3 +34,7 @@ def protected_route(person: Person = Depends(current_user)):
 @app.get("/unprotected-route")
 def unprotected_route():
     return f"Hello, anonym"
+    
+
+
+#app.include_router(router_operation) #операция с роутом
