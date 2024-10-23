@@ -24,11 +24,13 @@ person = Table(
     Column("is_active", Boolean, default=True, nullable=False),
     Column("is_superuser", Boolean, default=False, nullable=False),
     Column("is_verified", Boolean, default=False, nullable=False),
+    extend_existing=True
 )
 
 
 class Person(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = 'person'
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     person_name = Column(String(length=16), nullable=False)
     tag_id = Column(Integer, nullable=False)

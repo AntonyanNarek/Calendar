@@ -6,10 +6,10 @@ from auth.base_config import Person, current_user
 from auth.manager import get_user_manager
 from auth.base_config import auth_backend, fastapi_users
 from auth.schemas import PersonRead, PersonCreate
-#from operations.router import router as router_operation #потом добавить
+from room.router import router as router_room #потом добавить
 
 app = FastAPI(
-    title="Trading App"
+    title="Calenfi"
 )
 
 app.include_router(
@@ -25,7 +25,6 @@ app.include_router(
 )
 
 
-
 @app.get("/protected-route")
 def protected_route(person: Person = Depends(current_user)):
     return f"Hello, {person.person_name}"
@@ -36,5 +35,4 @@ def unprotected_route():
     return f"Hello, anonym"
     
 
-
-#app.include_router(router_operation) #операция с роутом
+app.include_router(router_room) #операция с роутом
