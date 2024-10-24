@@ -31,33 +31,57 @@ def convert_rows_to_dicts(rows):
 @router.get("/rooms")
 async def get_rooms(session: AsyncSession = Depends(get_async_session),
                     person: Person = Depends(current_user)):
-    query = select(room)
-    result = await session.execute(query)
-    rooms = result.all()
+    try:
+        query = select(room)
+        result = await session.execute(query)
+        rooms = result.all()
 
-    if not rooms:
-        raise HTTPException(status_code=404, detail="Нет таких комнат")
-
-    return convert_rows_to_dicts(rooms)
+        return convert_rows_to_dicts(rooms)
+    except Exception:
+        raise HTTPException(status_code=500, detail={
+            "status": "error",
+            "data": None,
+            "details": None
+    })
 
 
 @router.get("/specific_rooms")
 async def get_specific_rooms(room_name: str, session: AsyncSession = Depends(get_async_session),
                              person: Person = Depends(current_user)):
-    query = select(room).where(room.c.room_name == room_name)
-    result = await session.execute(query)
-    rooms = result.all()
+    try:
+        query = select(room).where(room.c.room_name.ilike(f"%{room_name}%"))
+        result = await session.execute(query)
+        rooms = result.all()
 
-    if not rooms:
-        raise HTTPException(status_code=404, detail="Нет таких комнат")
+        return {
+            "status": "success",
+            "data": convert_rows_to_dicts(rooms),
+            "details": f"Комнаты с названием {room_name}"
+        }
 
-    return convert_rows_to_dicts(rooms)
+    except Exception:
+        raise HTTPException(status_code=500, detail={
+            "status": "error",
+            "data": None,
+            "details": None
+        })
 
 
 @router.post("/add_room")
 async def add_specific_operations(new_operation: RoomCreate, session: AsyncSession = Depends(get_async_session),
                                   person: Person = Depends(current_user)):
-    stmt = insert(room).values(**new_operation.dict())
-    await session.execute(stmt)
-    await session.commit()
-    return {"status": "Комната добавлена"}
+    try:
+        stmt = insert(room).values(**new_operation.dict())
+        await session.execute(stmt)
+        await session.commit()
+        return {
+                "status": "success",
+                "data": None,
+                "details": "Комната создана"
+            }
+    except Exception:
+        raise HTTPException(status_code=400, detail={
+            "status": "error",
+            "data": None,
+            "details": None
+        })
