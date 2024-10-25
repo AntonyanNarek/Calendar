@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from fastapi_cache.decorator import cache
 from database import get_async_session
 from room.models import room
 from room.schemas import RoomCreate
@@ -29,6 +29,7 @@ def convert_rows_to_dicts(rows):
 
 
 @router.get("/rooms")
+@cache(expire=60)
 async def get_rooms(session: AsyncSession = Depends(get_async_session),
                     person: Person = Depends(current_user)):
     try:

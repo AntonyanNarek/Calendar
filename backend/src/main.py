@@ -1,12 +1,14 @@
 from fastapi_users import FastAPIUsers
 
 from fastapi import FastAPI, Depends
-
+from redis import asyncio as aioredis
 from auth.base_config import Person, current_user
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from auth.manager import get_user_manager
 from auth.base_config import auth_backend, fastapi_users
 from auth.schemas import PersonRead, PersonCreate
-from room.router import router as router_room #потом добавить
+from room.router import router as router_room
 
 app = FastAPI(
     title="Calenfi"
@@ -36,3 +38,9 @@ def unprotected_route():
     
 
 app.include_router(router_room) #операция с роутом
+
+
+@app.on_event("startup")
+async def startup_event():
+    redis = aioredis.from_url("redis://localhost", encoding="utf8", decode_responses=True)
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
