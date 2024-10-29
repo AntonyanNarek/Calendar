@@ -8,13 +8,40 @@ from auth.utils import get_user_db
 
 from auth.generate_id import generate_tag_id
 
+import aiosmtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
 
 class UserManager(IntegerIDMixin, BaseUserManager[Person, int]):
     reset_password_token_secret = SECRET_KEY
     verification_token_secret = SECRET_KEY
 
-    async def on_after_register(self, person: Person, request: Optional[Request] = None):#можно отправить письмо на почту
+    async def on_after_register(self, person: Person, request: Optional[Request] = None):
         print(f"User {person.id} has registered.")
+        await self.send_welcome_email(person)
+
+    async def send_welcome_email(self, person: Person):
+        sender_email = "notabane001@gmail.com"
+        sender_password = "lbfbjwlgafkdvdef"  # приложение-пароль без пробелов
+        subject = f"{person.person_name} добро пожаловать в Каленфи!"
+        body = "Спасибо что зарегистрировались в нашем продукте!"
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = person.email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        try:
+            smtp = aiosmtplib.SMTP(hostname="smtp.gmail.com", port=465, use_tls=True)
+            await smtp.connect()
+            await smtp.login(sender_email, sender_password)
+            await smtp.send_message(msg)
+            await smtp.quit()
+            print(f"Email sent to {person.email}")
+        except Exception as e:
+            print(f"Failed to send email to {person.email}: {e}")
 
     async def create(
         self,
@@ -43,7 +70,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[Person, int]):
         await self.on_after_register(created_user, request)
 
         return created_user
-
 
 async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)
